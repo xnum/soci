@@ -130,12 +130,14 @@ session::session(connection_pool & pool)
     poolPosition_ = pool.lease();
     session & pooledSession = pool.at(poolPosition_);
 
+    pool_->at(poolPosition_).reconnect(); // reconnect pool conn
+
     once.set_session(&pooledSession);
     prepare.set_session(&pooledSession);
     backEnd_ = pooledSession.get_backend();
 }
 
-session::~session()
+session::~session() SOCI_NOEXCEPT_FALSE
 {
     if (isFromPool_)
     {

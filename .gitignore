@@ -51,3 +51,6 @@ CMakeLists.txt.user
 
 # Python
 .venv/
+
+# IDEA
+/.idea
