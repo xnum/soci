@@ -39,7 +39,6 @@ SOCI_MYSQL_DECL backend_factory const * factory_mysql()
 
 SOCI_MYSQL_DECL void register_factory_mysql()
 {
-    mysql_library_init(0, NULL, NULL);
     soci::dynamic_backends::register_backend("mysql", soci::mysql);
 }
 
