@@ -30,6 +30,7 @@
 #endif // _WIN32
 #include <mysql.h> // MySQL Client
 #include <vector>
+#include <mutex>
 
 
 namespace soci
@@ -262,6 +263,9 @@ struct mysql_backend_factory : backend_factory
     mysql_backend_factory() {}
     mysql_session_backend * make_session(
         connection_parameters const & parameters) const SOCI_OVERRIDE;
+
+    mutable int initLibrary_;
+    mutable std::mutex mtx_;
 };
 
 extern SOCI_MYSQL_DECL mysql_backend_factory const mysql;

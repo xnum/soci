@@ -10,11 +10,17 @@
 #include "soci/mysql/soci-mysql.h"
 #include <cctype>
 #include <ciso646>
+#include <set>
+#include <mutex>
+#include <thread>
 
 using namespace soci;
 using namespace soci::details;
 using std::string;
 
+
+static std::set<std::thread::id> initedThreads_;
+static std::mutex initedMtx_;
 
 mysql_statement_backend::mysql_statement_backend(
     mysql_session_backend &session)
@@ -152,6 +158,23 @@ mysql_statement_backend::execute(int number)
         if (number > 0)
         {
              numberOfExecutions = hasUseElements_ ? 1 : number;
+        }
+
+
+        {
+          std::unique_lock<std::mutex> lk(initedMtx_);
+          std::thread::id tid = std::this_thread::get_id();
+          auto initedResult = initedThreads_.insert(tid);
+          if (initedResult.second) {
+            mysql_thread_init();
+          }
+          lk.unlock();
+
+          int errCode = 0;
+          if(0 != (errCode = mysql_ping(session_.conn_)))
+          {
+            throw soci_error("mysql_ping faile, code: " + std::to_string(errCode));
+          }
         }
 
         std::string query;
