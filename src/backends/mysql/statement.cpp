@@ -154,6 +154,12 @@ mysql_statement_backend::execute(int number)
              numberOfExecutions = hasUseElements_ ? 1 : number;
         }
 
+        int errCode = 0;
+        if(0 != (errCode = mysql_ping(session_.conn_)))
+        {
+          throw soci_error("mysql_ping faile, code: " + std::to_string(errCode));
+        }
+
         std::string query;
         if (not useByPosBuffers_.empty() or not useByNameBuffers_.empty())
         {
