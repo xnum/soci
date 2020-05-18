@@ -21,6 +21,13 @@ using namespace soci::details;
 // concrete factory for MySQL concrete strategies
 mysql_session_backend* mysql_backend_factory::make_session(
     connection_parameters const& parameters) const {
+  std::unique_lock<std::mutex> lk(mtx_);
+  std::thread::id tid = std::this_thread::get_id();
+  auto result = initedThreads_.insert(tid);
+  if (result.second) { // inserted.
+    mysql_thread_init();
+  }
+
   return new mysql_session_backend(parameters);
 }
 
